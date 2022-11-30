@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS-CALL-EXAMPLE</title>
+</head>
+
+<body>
+    <!-- 注意：当连接失败时，这个状态是不正确的。因为chrome插件中 nativeDisconnectListener 方法没有通知index.html连接失败了。
+        连接成功只是根据port字段不为空判断的。
+
+
+    -->
+    <div>connect state: <span id="connect-state">Not connected</span></div>
+    <button type="button" onClick="connect()" id="connect-btn">connect</button>
+    <button type="button" onClick="disconnect()" id="disconnect-btn" style="display: none;">disconnect</button>
+
+    <div id="sendWrap" style="display: none">
+        <input id="sendInput" type="text">
+        <button id="sendBtn" onClick="send()">Send</button>
+    </div>
+
+    <script>
+        let is_connected = false;
+
+        // message to extension
+        function sendMessgeToExtension(msg, callback) {
+            document.dispatchEvent(new CustomEvent('SendMessageFromJs', {
+                detail: msg
+            }))
+        }
+
+        function connect() {
+            sendMessgeToExtension({ type: 'connect' })
+        }
+
+        function disconnect() {
+            sendMessgeToExtension({ type: 'disconnect' })
+        }
+
+        function send() {
+            sendMessgeToExtension({type: 'send', message: document.getElementById('sendInput').value})
+
+            document.getElementById('sendInput').value = ""
+        }
+
+        function updateUI() {
+            if(is_connected) {
+                document.getElementById('connect-btn').style.display = 'none'
+                document.getElementById('disconnect-btn').style.display = 'block'
+                document.getElementById('sendWrap').style.display = 'block'
+
+            } else {
+                document.getElementById('connect-btn').style.display = 'block'
+                document.getElementById('disconnect-btn').style.display = 'none'
+                document.getElementById('sendWrap').style.display = 'none'
+            }
+        }
+
+        // message from extension 
+        document.addEventListener('SendMessageFromExtension', (evt) => {
+            console.log("from extension: ", evt)
+            if (evt.detail.request.type === 'connect' || evt.detail.request.type === 'disconnect') {
+                if (evt.detail.result === true) {
+                    console.log("connect to native successed!!!")
+                    document.getElementById('connect-state').innerHTML = "connect to native successed!!!"
+                    is_connected = true;
+                    updateUI();
+                } else {
+                    console.log("connect to native failed!!!")
+                    document.getElementById('connect-state').innerHTML = "connect to native failed!!!"
+                    is_connected = false;
+                    updateUI();
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,9 @@
+{
+    "name": "com.chenhao.exe_demo",
+    "description": "chrome extension native messaging demo",
+    "path": "executable-demo.exe",
+    "type": "stdio",
+    "allowed_origins": [
+      "chrome-extension://fegmifgbcgiiipfmjjobjgkaocbmpfgm/"
+    ]
+  }
